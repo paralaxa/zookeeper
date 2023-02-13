@@ -68,10 +68,6 @@ public class LeaderElection extends ZkInitializer {
     return getCurrentPid().equals(leader.getValue());
   }
 
-  private void watchForChanges() throws InterruptedException, KeeperException {
-    zkConnector.getZkClient().addWatch(STOPANGINS_APP, this, AddWatchMode.PERSISTENT);
-  }
-
   @Override
   public void process(WatchedEvent event) {
     log.info("Change detected");
