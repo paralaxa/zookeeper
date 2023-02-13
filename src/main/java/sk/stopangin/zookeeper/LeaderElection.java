@@ -17,7 +17,7 @@ import org.apache.zookeeper.ZooKeeper;
 @Slf4j
 public class LeaderElection extends ZkInitializer {
 
-  private static final String STOPANGINS_APP = "/stopanginsApp/leaders";
+  private static final String STOPANGINS_APP = "/leaderApp";
   private Leader leader;
 
 

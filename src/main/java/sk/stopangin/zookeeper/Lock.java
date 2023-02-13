@@ -14,7 +14,7 @@ import org.apache.zookeeper.ZooKeeper;
 @Slf4j
 public class Lock extends ZkInitializer {
 
-  private static final String STOPANGINS_APP_LOCKS = "/stopanginsApp/locks";
+  private static final String STOPANGINS_APP_LOCKS = "/lockApp";
 
   private String thisLockNode;
 

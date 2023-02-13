@@ -15,7 +15,7 @@ import org.apache.zookeeper.ZooKeeper;
 @Slf4j
 public class CyclicBarrier extends ZkInitializer {
 
-  private static final String STOPANGINS_APP = "/stopanginsApp/cyclicBarrier";
+  private static final String STOPANGINS_APP = "/cyclicBarrierApp";
 
   private final CountDownLatch countDownLatch = new CountDownLatch(1);
 

@@ -21,7 +21,7 @@ public class HowItWorks extends ZkInitializer {
   private void createChildNode() throws InterruptedException, KeeperException {
     log.info("Creating childNode");
     zkConnector.getZkClient()
-        .create(getRootNode() + "/" + "childNode/newNodeEp", "childData".getBytes(
+        .create(getRootNode() + "/" + "newNodeEp", "childData".getBytes(
                 StandardCharsets.UTF_8), ZooDefs.Ids.OPEN_ACL_UNSAFE,
             CreateMode.EPHEMERAL);
   }
@@ -54,7 +54,7 @@ public class HowItWorks extends ZkInitializer {
 
     ZooKeeper zkClient = zkConnector.getZkClient();
     zkClient.setData(dataNodePath,
-        (System.currentTimeMillis() + "_newConifg").getBytes(StandardCharsets.UTF_8),2);
+        (System.currentTimeMillis() + "_newConifg").getBytes(StandardCharsets.UTF_8),0);
   }
 
   private boolean dataNodeDoesNotExistYet(String dataNodePath)
@@ -65,7 +65,7 @@ public class HowItWorks extends ZkInitializer {
 
   @Override
   protected String getRootNode() {
-    return "/demoRootNode";
+    return "/howItWorksApp";
   }
 
   @Override
