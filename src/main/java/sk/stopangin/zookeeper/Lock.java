@@ -1,12 +1,11 @@
 package sk.stopangin.zookeeper;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Timer;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
+import org.apache.zookeeper.KeeperException.NodeExistsException;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
@@ -16,38 +15,50 @@ public class Lock extends ZkInitializer {
 
   private static final String STOPANGINS_APP_LOCKS = "/lockApp";
 
-  private String thisLockNode;
 
-
-  private void registerLock() throws InterruptedException, KeeperException {
+  private boolean registerLock() throws InterruptedException, KeeperException {
     ZooKeeper zkClient = zkConnector.getZkClient();
+    String lockPath = getLockPath();
+    try {
+      zkClient.create(lockPath, new byte[1], Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+      return true;
+    } catch (NodeExistsException e) {
+      return false;
+    }
+  }
+
+  private String getLockPath() {
     String lockPath = STOPANGINS_APP_LOCKS + "/lock";
-    thisLockNode = zkClient
-        .create(lockPath, new byte[1],
-            Ids.OPEN_ACL_UNSAFE,
-            CreateMode.EPHEMERAL_SEQUENTIAL);
+    return lockPath;
   }
 
   private void tryLock() throws InterruptedException, KeeperException {
     ZooKeeper zkClient = zkConnector.getZkClient();
-    List<String> children = zkClient.getChildren(STOPANGINS_APP_LOCKS, false); //heard effect
-    Collections.sort(children);
-    String actuallyHeldLock = children.get(0);
-    if (thisLockNode.contains(actuallyHeldLock)) {
-      log.info("Locked!");
-      sleepSafe();
-      zkClient.delete(STOPANGINS_APP_LOCKS + "/" + actuallyHeldLock, 0);
-      log.info("Done");
+
+    if (zkClient.exists(getLockPath(), false) == null) {
+      if (registerLock()) {
+        log.info("Locked!");
+        sleepSafe();
+        zkClient.close();
+        log.info("Done");
+      } else {
+        log.info("Lock unsuccessful registering watch");
+        registerWatch(zkClient);
+      }
     } else {
-      zkClient.exists(STOPANGINS_APP_LOCKS + "/" + actuallyHeldLock,
-          this); //aby som nemal heard effect, registrujem len na tento node
+      registerWatch(zkClient);
     }
+  }
+
+  private void registerWatch(ZooKeeper zkClient) throws KeeperException, InterruptedException {
+    zkClient.exists(getLockPath(),
+        this);
   }
 
   private void sleepSafe() {
     try {
       log.info("Processing");
-      TimeUnit.SECONDS.sleep(10);
+      TimeUnit.SECONDS.sleep(20);
     } catch (InterruptedException e) {
     }
   }
@@ -61,7 +72,6 @@ public class Lock extends ZkInitializer {
     try {
       init();
       createRootNode();
-      registerLock();
       tryLock();
     } catch (Exception e) {
       log.error(e.getMessage(), e);
