@@ -28,8 +28,7 @@ public class Lock extends ZkInitializer {
   }
 
   private String getLockPath() {
-    String lockPath = STOPANGINS_APP_LOCKS + "/lock";
-    return lockPath;
+    return STOPANGINS_APP_LOCKS + "/lock";
   }
 
   private void tryLock() throws InterruptedException, KeeperException {
@@ -58,7 +57,7 @@ public class Lock extends ZkInitializer {
   private void sleepSafe() {
     try {
       log.info("Processing");
-      TimeUnit.SECONDS.sleep(20);
+      TimeUnit.SECONDS.sleep(10);
     } catch (InterruptedException e) {
     }
   }
